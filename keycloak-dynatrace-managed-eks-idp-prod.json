@@ -1,0 +1,137 @@
+{
+  "dashboardMetadata": {
+    "name": "Keycloak 26.4.7 - EKS PROD (Dynatrace Managed)",
+    "shared": true,
+    "owner": "IAM / Platform",
+    "dashboardFilter": {
+      "timeframe": "-2h"
+    }
+  },
+  "tiles": [
+    {
+      "name": "Service Availability",
+      "tileType": "SERVICE_AVAILABILITY",
+      "configured": true,
+      "bounds": { "top": 0, "left": 0, "width": 300, "height": 220 },
+      "service": {
+        "serviceName": "keycloak"
+      }
+    },
+    {
+      "name": "HTTP Latency p95",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": { "top": 0, "left": 300, "width": 460, "height": 220 },
+      "queries": [
+        {
+          "metric": "http.server.requests.duration",
+          "aggregation": "P95",
+          "filterBy": {
+            "filterOperator": "AND",
+            "filters": [
+              {
+                "dimensionKey": "k8s.namespace.name",
+                "dimensionValue": "idp-prod-keycloa-masu"
+              }
+            ]
+          }
+        }
+      ],
+      "visualConfig": {
+        "type": "LINE"
+      }
+    },
+    {
+      "name": "HTTP Requests",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": { "top": 220, "left": 0, "width": 760, "height": 240 },
+      "queries": [
+        {
+          "metric": "http.server.requests.count",
+          "aggregation": "SUM",
+          "splitBy": [
+            "http.status_code"
+          ]
+        }
+      ],
+      "visualConfig": {
+        "type": "LINE"
+      }
+    },
+    {
+      "name": "HTTP 5xx Errors",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": { "top": 460, "left": 0, "width": 380, "height": 220 },
+      "queries": [
+        {
+          "metric": "http.server.requests.count",
+          "aggregation": "SUM",
+          "filterBy": {
+            "filterOperator": "AND",
+            "filters": [
+              {
+                "dimensionKey": "http.status_code",
+                "dimensionValue": "5*"
+              },
+              {
+                "dimensionKey": "k8s.namespace.name",
+                "dimensionValue": "idp-prod-keycloa-masu"
+              }
+            ]
+          }
+        }
+      ],
+      "visualConfig": {
+        "type": "LINE"
+      }
+    },
+    {
+      "name": "Pod CPU Usage",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": { "top": 460, "left": 380, "width": 380, "height": 220 },
+      "queries": [
+        {
+          "metric": "k8s.pod.cpu.usage",
+          "aggregation": "AVG",
+          "splitBy": [
+            "k8s.pod.name"
+          ]
+        }
+      ],
+      "visualConfig": {
+        "type": "AREA"
+      }
+    },
+    {
+      "name": "Pod Memory Usage",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": { "top": 680, "left": 0, "width": 760, "height": 220 },
+      "queries": [
+        {
+          "metric": "k8s.pod.memory.usage",
+          "aggregation": "AVG",
+          "splitBy": [
+            "k8s.pod.name"
+          ]
+        }
+      ],
+      "visualConfig": {
+        "type": "AREA"
+      }
+    },
+    {
+      "name": "Login Failures (Logs)",
+      "tileType": "LOG_ANALYTICS",
+      "configured": true,
+      "bounds": { "top": 900, "left": 0, "width": 760, "height": 260 },
+      "query": "fetch logs | filter k8s.namespace.name == \"idp-prod-keycloa-masu\" | filter contains(content, \"LOGIN_ERROR\") | summarize count() by bin(timestamp, 5m)",
+      "visualConfig": {
+        "type": "BAR"
+      }
+    }
+  ]
+}
